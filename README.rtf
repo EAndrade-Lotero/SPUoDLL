@@ -1,0 +1,85 @@
+
+### Classifying dog breeds datasets ###
+
+Principal Investigator / Contact person: Edgar J. Andrade-Lotero, Universidad del Rosario, Bogota, Colombia,  edgar.andrade@urosario.edu.co
+In collaboration with: Robert L. Goldstone, Indiana University, Bloomington, Indiana, USA, rgoldsto@indiana.edu
+In collaboration with: Javier Alejandro Velazco Garcia, Universidad del Rosario, Bogota, Colombia, javier.velasco8@gmail.com
+
+Publications using these data:
+
+[1] Andrade-Lotero, E., & Goldstone, R. L., & Ortiz-Duque, J. M., & Velazco-Garcia, J. A. (2021). Self-perception of understanding and the division of linguistic labor. To appear in Synthese.
+
+Datasets described here:
+- performance.csv
+- rep-understanding.csv
+
+=======================
+
+Filename: performances.csv
+
+Location: https://github.com/EAndrade-Lotero/SODCL/blob/master/Data/performances.csv
+
+Behavioral data of 45 dyads playing the "Seek the unicorn experiment" (see https://www.protocols.io/view/seeking-the-unicorn-bts9nnh6). Data was obtained from raw json files output from nodegame.
+
+Method of data collection: nodeGame platform. Freely available at: https://github.com/Slendercoder/Seeking_the_unicorn
+
+Methods of data processing: Dataset generated from raw data via a python script to create a single csv from multiple json output from nodeGame.
+
+Number of variables: 138
+Number of rows: 5400
+Variables:
+* Dyad: name of dyad, which comes from the participants number which nodegame gives to each player.
+* Round: number of round of the experiment.
+* Player: name of player, which comes from the name of dyad and whether the player is player 1 or 2.
+* Answer: submitted answer during round, could be either "Absent" or "Present".
+* Time: number of milliseconds from start to finish of the round.
+* a11 to a88: whether the tile was visited (1) or not (0). For example, if a34=1, tile on third row fourth column was visited during round.
+* b11 to b88: order on which the tile was visited. For example, if b34=5, tile on third row fourth column was the fourth tile to be visited during round.
+* Score: score of the round.
+* Joint: number of overlapping tiles, that is, tiles visited by both players during round.
+* Is_there: whether there was or not a unicorn during round.
+* where_x: column where unicorn was placed, or -1 if unicorn absent.
+* where_y: row where unicorn was placed, or -1 if unicorn absent.
+
+=======================
+
+Filename: humans_only_absent.csv
+
+Location: https://github.com/EAndrade-Lotero/SODCL/blob/master/Data/humans_only_absent.csv
+
+Behavioral data keeping only rounds with unicorn absent and with additional measures (accumulated score, consistency, difference in consistency between players, DLindex, maximum similarity to focal region, best fit focal region) of 45 dyads playing the "Seek the unicorn" experiment (https://www.protocols.io/view/seeking-the-unicorn-bts9nnh6).
+
+Method of data collection: Processing of performances.csv.
+
+Methods of data processing: Dataset generated from performances.csv via a python script to obtain measures described in [2].
+
+Number of variables: 154
+Number of rows: 1244
+Variables:
+* Dyad: name of dyad, which comes from the participants number which nodegame gives to each player.
+* Round: number of round of the experiment.
+* Player: name of player, which comes from the name of dyad and whether the player is player 1 or 2.
+* Answer: submitted answer during round, could be either "Absent" or "Present".
+* Time: number of milliseconds from start to finish of the round.
+* a11 to a88: whether the tile was visited (1) or not (0). For example, if a34=1, tile on third row fourth column was visited during round.
+* b11 to b88: order on which the tile was visited. For example, if b34=5, tile on third row fourth column was the fourth tile to be visited during round.
+* Score: score of the round.
+* Joint: number of overlapping tiles, that is, tiles visited by both players during round.
+* Is_there: whether there was or not a unicorn during round.
+* where_x: column where unicorn was placed, or -1 if unicorn absent.
+* where_y: row where unicorn was placed, or -1 if unicorn absent.
+* Ac_Score: accumulated score up until round.
+* ScoreLEAD: score from next round.
+* Size_visited: number of tiles the player visited during round.
+* Consistency: Overlapping uncovered tiles from Round n-1 to Round n / Tiles uncovered in either of the two rounds.
+* Total_visited_dyad: total number of tiles visited by both players during round.
+* Dif_consist: difference between players' consistency during round.
+* DLIndex: (Tiles uncovered by one footnotesize or both of the players -  Overlapping tiles) / Tiles in the grid.
+* Category: best fitting focal region for visited tiles during round based on maximum similarity.
+* Similarity: maximum similarity between visited tiles during round and the focal regions, based on sim(a, b) = Number of tiles in both a and b / Number of tiles in a or b.
+* Score_LAG1: Score from previous round.
+* Consistency_LEAD1: Consistency from next round.
+* Joint_LAG1: number of overlapping tiles, that is, tiles visited by both players during previous round.
+* Dif_consist_LAG1: difference between players' consistency during previous round.
+* RegionGo: best fitting focal region for visited tiles on next round.
+* Similarity_LAG1: maximum similarity between visited tiles on next round.
