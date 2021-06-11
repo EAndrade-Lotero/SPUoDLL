@@ -10,76 +10,60 @@ Publications using these data:
 [1] Andrade-Lotero, E., & Goldstone, R. L., & Ortiz-Duque, J. M., & Velazco-Garcia, J. A. (2021). Self-perception of understanding and the division of linguistic labor. To appear in Synthese.
 
 Datasets described here:
-- performance.csv
+- performances.csv
 - rep-understanding.csv
 
 =======================
 
 Filename: performances.csv
 
-Location: https://github.com/EAndrade-Lotero/SODCL/blob/master/Data/performances.csv
+Location: https://github.com/EAndrade-Lotero/SPUoDLL/blob/master/performances.csv
 
-Behavioral data of 45 dyads playing the "Seek the unicorn experiment" (see https://www.protocols.io/view/seeking-the-unicorn-bts9nnh6). Data was obtained from raw json files output from nodegame.
+Behavioral data of 20 dyads playing the "Classifying dog breeds" experiment in the paired condition and 44 individuals playing the solo condition (see https://www.protocols.io/edit/classifying-dog-breeds-bvm6n49e). Data was obtained from raw json files output from nodeGame and processed into a single dataframe.
 
-Method of data collection: nodeGame platform. Freely available at: https://github.com/Slendercoder/Seeking_the_unicorn
+Method of data collection: nodeGame platform. Freely available at: https://github.com/Slendercoder/DLL (paired condition; Spanish interface) and at: https://github.com/Slendercoder/DLL_single (solo condition; Spanish interface).
 
-Methods of data processing: Dataset generated from raw data via a python script to create a single csv from multiple json output from nodeGame.
+Methods of data processing: Dataset generated from raw data via python scripts to create a single csv from multiple json output from nodeGame.
 
-Number of variables: 138
-Number of rows: 5400
+Number of variables: 13
+Number of rows: 20735
 Variables:
-* Dyad: name of dyad, which comes from the participants number which nodegame gives to each player.
-* Round: number of round of the experiment.
-* Player: name of player, which comes from the name of dyad and whether the player is player 1 or 2.
-* Answer: submitted answer during round, could be either "Absent" or "Present".
-* Time: number of milliseconds from start to finish of the round.
-* a11 to a88: whether the tile was visited (1) or not (0). For example, if a34=1, tile on third row fourth column was visited during round.
-* b11 to b88: order on which the tile was visited. For example, if b34=5, tile on third row fourth column was the fourth tile to be visited during round.
-* Score: score of the round.
-* Joint: number of overlapping tiles, that is, tiles visited by both players during round.
-* Is_there: whether there was or not a unicorn during round.
-* where_x: column where unicorn was placed, or -1 if unicorn absent.
-* where_y: row where unicorn was placed, or -1 if unicorn absent.
+1. treatment: single or dyad.
+2. dyad: dyad's name.
+3. player: player's id.
+4. expert_in: refers to the player's expert-dogs (terriers or hounds), that is, the kinds of dogs on which the player trained during training rounds.
+5. novice_in: refers to the player's novice-dogs (terriers or hounds).
+6. stage: experiment's stage (training or game).
+7. round: round of the respective stage.
+8. kind: dog's kind.
+9. classif: refers to the label the player used to classify the dog.
+10. accuracy: whether classification was correct (0=incorrect/1=correct).
+11. queried: number of times the player asked partner about dog (NaN if no query was made or if player belongs to treatment==single).
+12. label: label used by player to query partner (NaN if player didn't query or treatment==single).
+13. answered: proportion of times query was answered by partner.
+14. answer_correct: whether partner's answer was correct or not (0=incorrect/1=correct).
 
 =======================
 
-Filename: humans_only_absent.csv
+Filename: rep-understanding.csv
 
-Location: https://github.com/EAndrade-Lotero/SODCL/blob/master/Data/humans_only_absent.csv
+Location: https://github.com/EAndrade-Lotero/SPUoDLL/blob/master/rep-understanding.csv
 
-Behavioral data keeping only rounds with unicorn absent and with additional measures (accumulated score, consistency, difference in consistency between players, DLindex, maximum similarity to focal region, best fit focal region) of 45 dyads playing the "Seek the unicorn" experiment (https://www.protocols.io/view/seeking-the-unicorn-bts9nnh6).
+Self-understanding reports from each participant for each dog breed, obtained at the end of the "Classifying dog breeds" experiment.
 
-Method of data collection: Processing of performances.csv.
+Method of data collection: nodeGame platform.
 
-Methods of data processing: Dataset generated from performances.csv via a python script to obtain measures described in [2].
+Methods of data processing: Dataset generated from raw data via a python script to create a single csv from multiple json output from nodeGame.
 
-Number of variables: 154
-Number of rows: 1244
+Number of variables: 9
+Number of rows: 336
 Variables:
-* Dyad: name of dyad, which comes from the participants number which nodegame gives to each player.
-* Round: number of round of the experiment.
-* Player: name of player, which comes from the name of dyad and whether the player is player 1 or 2.
-* Answer: submitted answer during round, could be either "Absent" or "Present".
-* Time: number of milliseconds from start to finish of the round.
-* a11 to a88: whether the tile was visited (1) or not (0). For example, if a34=1, tile on third row fourth column was visited during round.
-* b11 to b88: order on which the tile was visited. For example, if b34=5, tile on third row fourth column was the fourth tile to be visited during round.
-* Score: score of the round.
-* Joint: number of overlapping tiles, that is, tiles visited by both players during round.
-* Is_there: whether there was or not a unicorn during round.
-* where_x: column where unicorn was placed, or -1 if unicorn absent.
-* where_y: row where unicorn was placed, or -1 if unicorn absent.
-* Ac_Score: accumulated score up until round.
-* ScoreLEAD: score from next round.
-* Size_visited: number of tiles the player visited during round.
-* Consistency: Overlapping uncovered tiles from Round n-1 to Round n / Tiles uncovered in either of the two rounds.
-* Total_visited_dyad: total number of tiles visited by both players during round.
-* Dif_consist: difference between players' consistency during round.
-* DLIndex: (Tiles uncovered by one footnotesize or both of the players -  Overlapping tiles) / Tiles in the grid.
-* Category: best fitting focal region for visited tiles during round based on maximum similarity.
-* Similarity: maximum similarity between visited tiles during round and the focal regions, based on sim(a, b) = Number of tiles in both a and b / Number of tiles in a or b.
-* Score_LAG1: Score from previous round.
-* Consistency_LEAD1: Consistency from next round.
-* Joint_LAG1: number of overlapping tiles, that is, tiles visited by both players during previous round.
-* Dif_consist_LAG1: difference between players' consistency during previous round.
-* RegionGo: best fitting focal region for visited tiles on next round.
-* Similarity_LAG1: maximum similarity between visited tiles on next round.
+1. treatment: single or dyad.
+2. player: player's id.
+3. kind: the dog's kind.
+4. expertise: whether the player was trained on this kind of dog or not (experts or novices).
+5. report: player's reported understanding score on this kind of dog.
+6. accuracy: mean accuracy over game rounds on this kind of dog.
+7. query: proportion of times the player queried their partner on this kind of dog.
+8. answered: proportion of times queries on this kind of dog were answered by partner.
+9. player_responded: proportion of times player responded to queries on this kind of dog.
