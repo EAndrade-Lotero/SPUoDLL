@@ -1,6 +1,17 @@
 library(lme4)
 library(psych)
 library(dplyr)
+library(nlme)
+library(tidyverse) # data wrangling and visualization
+library(sjPlot)    # to visualizing mixed-effects models
+library(effects)   # to visualizing mixed-effects models
+library(lmerTest)  # p-values for MEMs based on the Satterthwaite approximation
+library(report)    # mainly for an "report" function
+library(emmeans)   # post-hoc analysis
+library(knitr)     # beautifying tables
+library(sjstats)   # ICC - intraclass-correlation coefficient
+library(caret)     # ML, model comparison & utility functions
+library(ggplot2)
 
 ###########################################
 ###########################################
@@ -26,7 +37,7 @@ data_training = data_training[data_training['round']>23,]
 # head(data_training)
 describeBy(data_training$accuracy, data_training$treatment)
 model = glmer(
-  'accuracy ~ treatment + (1|round)', 
+  'accuracy ~ treatment + (treatment|round)', 
   data = data_training, 
   family = binomial
 )
@@ -40,7 +51,7 @@ data_training = data[data['stage']=='Training rounds',]
 # head(data_training)
 describeBy(data_training$accuracy, data_training$treatment)
 model = glmer(
-  'accuracy ~ treatment + (1|round)', 
+  'accuracy ~ treatment + (treatment|round)', 
   data = data_training, 
   family = binomial
   )
@@ -55,7 +66,7 @@ data_game_experts = data_game_experts[data_game_experts['expert_dog']=='True',]
 # head(data_game_experts)
 describeBy(data_game_experts$accuracy, data_game_experts$treatment)
 model = glmer(
-  'accuracy ~ treatment + (1|round)', 
+  'accuracy ~ treatment + (treatment|round)', 
   data = data_game_experts, 
   family = binomial
 )
@@ -70,7 +81,7 @@ data_game_novices = data_game_novices[data_game_novices['expert_dog']=='False',]
 # head(data_game_novices)
 describeBy(data_game_novices$accuracy, data_game_novices$treatment)
 model = glmer(
-  'accuracy ~ treatment + (1|round)', 
+  'accuracy ~ treatment + (treatment|round)', 
   data = data_game_novices, 
   family = binomial
 )
@@ -126,10 +137,35 @@ df2 <- df1 %>%
     acc_external = cumsum(acc_external_)/cumsum(aux)
   ) %>%
   select(player,round,new_use,queried,acc_internal,acc_external)
+df2 = df2[complete.cases(df2),]
+fun_extreme <- function(x) {
+  if (x>.5) {return(1)}
+  else {return(0)}
+}
+df2$new_query = lapply(df2$new_use, fun_extreme)
+df2$new_query = unlist(df2$new_query)
 head(df2)
-model = lm(new_use ~ queried + acc_internal + acc_external, data = df2)
+
+model = lm(new_use ~ acc_internal + acc_external, data = df2)
 summary(model)
-par(mfrow = c(2, 2))
+performance::check_model(model)
+hist(df2$new_use)
+
+model = lme(new_use ~ acc_internal + acc_external, random = ~1|round, data = df2)
+summary(model)
+performance::check_model(model)
+
+
+plot(x=df2$queried, y=df2$new_query)
+plot(x=df2$acc_internal, y=df2$new_query)
+plot(x=df2$acc_external, y=df2$new_query)
+
+model = glmer(
+  'new_query ~ acc_internal + acc_external + (acc_internal|round) + (acc_external|round)', 
+  data = df2, 
+  family = binomial
+)
+summary(model)
 plot(model)
 
 ######### CHECK THE PROBLEMS WITH THE ASSUMPTIONS
