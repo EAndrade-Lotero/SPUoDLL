@@ -1,4 +1,4 @@
-library(lme4)
+# library(lme4)
 library(psych)
 library(dplyr)
 library(nlme)
@@ -12,6 +12,8 @@ library(knitr)     # beautifying tables
 library(sjstats)   # ICC - intraclass-correlation coefficient
 library(caret)     # ML, model comparison & utility functions
 library(ggplot2)
+library(lawstat)
+library(comprehenr)
 
 ###########################################
 ###########################################
@@ -97,78 +99,112 @@ data_game_novices = data_game_novices[data_game_novices['expert_dog']=='False',]
 # head(data_game_novices)
 describeBy(data_game_novices$accuracy, data_game_novices$queried)
 model = glmer(
-  'accuracy ~ queried + (1|round)', 
+  'accuracy ~ queried + (queried|round)', 
   data = data_game_novices, 
   family = binomial
 )
 summary(model)
 
-################################################
-# Game rounds paired novices linear regression
-################################################
+##############################################################
+# Game rounds paired novices mixed-effects linear regressions
+##############################################################
 
-fun_internal <- function(queried,accuracy) {
-  if (queried == 1 & accuracy == 1) {return(1)}
-  else {return(0)}
-} 
+#####################
+# Internal strategy
+#####################
 df <- data %>% 
   filter(stage == 'Game rounds') %>%
   filter(treatment == 'paired') %>%
   filter(expert_dog == 'False') %>%
-  select(player,round,queried,accuracy) %>%
-  mutate(
-    internal_accu = (1-queried)*accuracy,
-    external_accu = queried*accuracy
-  )
-head(df)
-df1 <- df %>% 
+  select(queried,player,round,accuracy) %>%
   group_by(player,round) %>%
-  summarize(
-    queried = mean(queried),
-    acc_internal_ = mean(internal_accu),
-    acc_external_ = mean(external_accu)
-  )
-df1$aux <- 1
-df1$new_use <- lead(df1$queried, 1)
-head(df1)
-df2 <- df1 %>% 
   mutate(
-    acc_internal = cumsum(acc_internal_)/cumsum(aux),
-    acc_external = cumsum(acc_external_)/cumsum(aux)
+    av_queried = mean(queried)
   ) %>%
-  select(player,round,new_use,queried,acc_internal,acc_external)
-df2 = df2[complete.cases(df2),]
-fun_extreme <- function(x) {
-  if (x>.5) {return(1)}
-  else {return(0)}
-}
-df2$new_query = lapply(df2$new_use, fun_extreme)
-df2$new_query = unlist(df2$new_query)
-head(df2)
-
-model = lm(new_use ~ acc_internal + acc_external, data = df2)
+  ungroup %>%
+  arrange(player,round,queried)
+head(df,10)
+df <- df %>% 
+  group_by(player,round,queried) %>%
+  summarize(
+    av_accuracy = mean(accuracy),
+    av_queried = mean(av_queried)
+  ) %>%
+  select(player,round,queried,av_queried,av_accuracy)
+head(df,10)
+df1 <- df %>%
+  spread(queried,av_accuracy) %>%
+  group_by(player) %>%
+  mutate(
+    new_use = lead(av_queried),
+    av_accuracy_no = `0`,
+    av_accuracy_yes = `1`,
+  ) %>%
+  ungroup %>%
+  select(player,round,av_accuracy_no,av_accuracy_yes,new_use)
+head(df1,10)
+df_no <- df1 %>%
+  select(player,round,av_accuracy_no,new_use)
+df_no <- df_no[complete.cases(df_no),]
+head(df_no)
+plot(df_no$av_accuracy_no, df_no$new_use)
+model = lme(new_use ~ av_accuracy_no, random = ~1|round, data = df_no)
 summary(model)
-performance::check_model(model)
-hist(df2$new_use)
 
-model = lme(new_use ~ acc_internal + acc_external, random = ~1|round, data = df2)
+#####################
+# External strategy
+#####################
+df <- data %>% 
+  filter(stage == 'Game rounds') %>%
+  filter(treatment == 'paired') %>%
+  filter(expert_dog == 'False') %>%
+  select(queried,player,round,answered,accuracy) %>%
+  group_by(player,round) %>%
+  mutate(
+    av_queried = mean(queried)
+  ) %>%
+  ungroup %>%
+  arrange(player,round,queried)
+head(df,10)
+df <- df %>% 
+  group_by(player,round,queried) %>%
+  summarize(
+    av_accuracy = mean(accuracy),
+    av_queried = mean(av_queried),
+    av_answered = mean(answered, na.rm=TRUE)
+  ) %>%
+  select(player,round,queried,av_queried,av_answered,av_accuracy)
+head(df,10)
+df1 <- df %>%
+  select(player,round,queried,av_accuracy,av_queried) %>%
+  spread(queried,av_accuracy) %>%
+  group_by(player) %>%
+  mutate(
+    new_use = lead(av_queried),
+    av_accuracy_yes = cummean(`1`),
+  ) %>%
+  ungroup %>%
+  select(player,round,av_accuracy_yes,new_use)
+head(df1,10)
+df2 <- df %>%
+  select(player,round,queried,av_answered) %>%
+  spread(queried,av_answered) %>%
+  mutate(
+    av_answered = `1`
+  ) %>% 
+  select(player,round,av_answered) %>%
+  group_by(player) %>%
+  mutate(
+    av_answered = cummean(av_answered)
+  )
+head(df2,10)
+df_yes <- merge(df1,df2,by=c("player","round"))
+df_yes <- df_yes %>% arrange(player,round)
+df_yes <- df_yes[complete.cases(df_yes),]
+head(df_yes,10)
+model = lme(new_use ~ av_accuracy_yes + av_answered, random = ~1|round, data = df_yes)
 summary(model)
-performance::check_model(model)
 
-
-plot(x=df2$queried, y=df2$new_query)
-plot(x=df2$acc_internal, y=df2$new_query)
-plot(x=df2$acc_external, y=df2$new_query)
-
-model = glmer(
-  'new_query ~ acc_internal + acc_external + (acc_internal|round) + (acc_external|round)', 
-  data = df2, 
-  family = binomial
-)
-summary(model)
-plot(model)
-
-######### CHECK THE PROBLEMS WITH THE ASSUMPTIONS
 
 ###########################################
 ###########################################
@@ -243,3 +279,29 @@ y = unlist(df_novices['accuracy'])
 cor.test(x, y, method=c("pearson", "kendall", "spearman"))
 y = unlist(df_novices['answered'])
 cor.test(x, y, method=c("pearson", "kendall", "spearman"))
+
+########################################
+# Paired novices difference in variances
+########################################
+df_novices = data %>% 
+  filter(expertise == 'novices') %>%
+  filter(treatment == 'paired') %>%
+  select(player,report,queried)
+q <- list(.25,1)
+quarts <- to_vec(for(i in q) quantile(df_novices$queried, i)[[1]])
+quarts <- c(0,quarts)
+quarts
+df_novices = df_novices %>% 
+  mutate(Group = cut(
+    queried, 
+    breaks = quarts, 
+    labels = c('very low', 'normal'),
+    include.lowest = TRUE
+  )) 
+describeBy(df_novices$report, df_novices$Group)
+p <- ggplot(df_novices, aes(x=Group, y=report)) + 
+  geom_violin()
+p
+var.test(report ~ Group, df_novices, 
+         alternative = "less")
+
