@@ -205,7 +205,6 @@ head(df_yes,10)
 model = lme(new_use ~ av_accuracy_yes + av_answered, random = ~1|round, data = df_yes)
 summary(model)
 
-
 ###########################################
 ###########################################
 # SELF-REPORT OF UNDERSTANDING 
@@ -239,9 +238,6 @@ df_experts = data %>%
 head(df_experts)
 x = unlist(df_experts['report'])
 y = unlist(df_experts['accuracy'])
-cor.test(x, y, method=c("pearson", "kendall", "spearman"))
-x = unlist(df_experts['report'])
-y = unlist(df_experts['player_responded'])
 cor.test(x, y, method=c("pearson", "kendall", "spearman"))
 
 
@@ -304,4 +300,3 @@ p <- ggplot(df_novices, aes(x=Group, y=report)) +
 p
 var.test(report ~ Group, df_novices, 
          alternative = "less")
-
