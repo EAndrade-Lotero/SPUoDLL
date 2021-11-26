@@ -205,6 +205,8 @@ head(df_yes,10)
 model = lme(new_use ~ av_accuracy_yes + av_answered, random = ~1|round, data = df_yes)
 summary(model)
 
+
+
 ###########################################
 ###########################################
 # SELF-REPORT OF UNDERSTANDING 
@@ -234,6 +236,16 @@ df_experts = data %>%
   filter(expertise == 'experts') %>%
   filter(treatment == 'paired') %>%
   filter(accuracy > .2) %>% # leave out outlier
+  select(treatment,player,report,accuracy,player_responded)
+head(df_experts)
+x = unlist(df_experts['report'])
+y = unlist(df_experts['accuracy'])
+cor.test(x, y, method=c("pearson", "kendall", "spearman"))
+
+# Correlations
+df_experts = data %>% 
+  filter(expertise == 'experts') %>%
+  filter(treatment == 'solo') %>%
   select(treatment,player,report,accuracy,player_responded)
 head(df_experts)
 x = unlist(df_experts['report'])
