@@ -152,7 +152,7 @@ model = lme(new_use ~ av_accuracy_no, random = ~1|round, data = df_no)
 summary(model)
 
 #####################
-# External strategy
+# Extended strategy
 #####################
 df <- data %>% 
   filter(stage == 'Game rounds') %>%
@@ -205,6 +205,31 @@ head(df_yes,10)
 model = lme(new_use ~ av_accuracy_yes + av_answered, random = ~1|round, data = df_yes)
 summary(model)
 
+
+########################################
+# Query rate own vs. Query rate partner
+########################################
+
+head(data)
+
+df <- data %>% 
+  filter(treatment == 'paired') %>%
+  filter(stage == 'Game rounds') %>%
+  select(dyad, player, queried) %>%
+  group_by(dyad, player) %>%
+  summarize(queried = sum(queried)) %>%
+  ungroup() %>%
+  group_by(dyad) %>%
+  mutate(queriedMost = max(queried),
+         queriedLeast = min(queried)) %>%
+  ungroup()
+df <- slice(df, seq(1, dim(df)[1], 2))
+head(df)
+dim(df)
+plot(df$queriedMost, df$queriedLeast)
+x = unlist(df$queriedMost)
+y = unlist(df$queriedLeast)
+cor.test(x, y, method=c("pearson", "kendall", "spearman"))
 
 
 ###########################################
