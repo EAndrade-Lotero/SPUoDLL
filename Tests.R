@@ -50,10 +50,10 @@ summary(model)
 #######################
 
 data_training = data[data['stage']=='Training rounds',]
-# head(data_training)
+head(data_training)
 describeBy(data_training$accuracy, data_training$treatment)
 model = glmer(
-  'accuracy ~ treatment + (treatment|round)', 
+  'accuracy ~ treatment + (treatment|round) + (treatment|player)', 
   data = data_training, 
   family = binomial
   )
