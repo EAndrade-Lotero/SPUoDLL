@@ -30,16 +30,16 @@ fun <- function(x) {
 }
 data$queried = unlist(lapply(data$queried, FUN = fun))
 
-#######################
+##########################
 # Last two training rounds
-#######################
+##########################
 
 data_training = data[data['stage']=='Training rounds',]
 data_training = data_training[data_training['round']>23,]
 # head(data_training)
 describeBy(data_training$accuracy, data_training$treatment)
 model = glmer(
-  'accuracy ~ treatment + (treatment|round)', 
+  'accuracy ~ treatment + (treatment|player) + (treatment|round)', 
   data = data_training, 
   family = binomial
 )
@@ -68,7 +68,7 @@ data_game_experts = data_game_experts[data_game_experts['expert_dog']=='True',]
 # head(data_game_experts)
 describeBy(data_game_experts$accuracy, data_game_experts$treatment)
 model = glmer(
-  'accuracy ~ treatment + (treatment|round)', 
+  'accuracy ~ treatment + (treatment|player) + (treatment|round)', 
   data = data_game_experts, 
   family = binomial
 )
@@ -83,7 +83,7 @@ data_game_novices = data_game_novices[data_game_novices['expert_dog']=='False',]
 # head(data_game_novices)
 describeBy(data_game_novices$accuracy, data_game_novices$treatment)
 model = glmer(
-  'accuracy ~ treatment + (treatment|round)', 
+  'accuracy ~ treatment + (treatment|player) + (treatment|round)', 
   data = data_game_novices, 
   family = binomial
 )
@@ -99,7 +99,7 @@ data_game_novices = data_game_novices[data_game_novices['expert_dog']=='False',]
 # head(data_game_novices)
 describeBy(data_game_novices$accuracy, data_game_novices$queried)
 model = glmer(
-  'accuracy ~ queried + (queried|round)', 
+  'accuracy ~ queried + (1|player) + (1|round)', 
   data = data_game_novices, 
   family = binomial
 )
