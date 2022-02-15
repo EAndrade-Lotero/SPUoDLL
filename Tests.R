@@ -17,7 +17,7 @@ library(comprehenr)
 
 ###########################################
 ###########################################
-# PERFORMANCES 
+# LOAD DATA FROM PERFORMANCES 
 ###########################################
 ###########################################
 data = read.csv('performances.csv')
@@ -30,88 +30,119 @@ fun <- function(x) {
 }
 data$queried = unlist(lapply(data$queried, FUN = fun))
 
-##########################
-# Last two training rounds
-##########################
+############################################################
+# TESTS MAIN TEXT 4.1 AND SUPPLEMENTARY MATERIAL SECTION 2.1
+############################################################
 
-data_training = data[data['stage']=='Training rounds',]
-data_training = data_training[data_training['round']>23,]
-# head(data_training)
-describeBy(data_training$accuracy, data_training$treatment)
-model = glmer(
-  'accuracy ~ treatment + (treatment|player) + (treatment|round)', 
-  data = data_training, 
-  family = binomial
-)
-summary(model)
-
-#######################
-# All training rounds
-#######################
+##################
+# Training rounds
+##################
 
 data_training = data[data['stage']=='Training rounds',]
 head(data_training)
 describeBy(data_training$accuracy, data_training$treatment)
 model = glmer(
-  'accuracy ~ treatment + (treatment|round) + (treatment|player)', 
+  'accuracy ~ treatment + (treatment|player) + (1|round) + (1|kind) + (1|object)', 
   data = data_training, 
   family = binomial
   )
 summary(model)
 
-#######################
-# Game rounds experts
-#######################
+#########################
+# Game rounds expert dogs
+#########################
 
-data_game_experts = data[data['stage']=='Game rounds',]
-data_game_experts = data_game_experts[data_game_experts['expert_dog']=='True',]
-# head(data_game_experts)
+data_game_experts = data %>% 
+  filter(stage == 'Game rounds') %>%
+  filter(expert_dog == 'True')
+head(data_game_experts)
 describeBy(data_game_experts$accuracy, data_game_experts$treatment)
 model = glmer(
-  'accuracy ~ treatment + (treatment|player) + (treatment|round)', 
+  'accuracy ~ treatment + (treatment|player) + (1|round) + (1|kind) + (1|object)', 
   data = data_game_experts, 
   family = binomial
 )
 summary(model)
 
-#######################
-# Game rounds novices
-#######################
+#########################
+# Game rounds novice dogs
+#########################
 
-data_game_novices = data[data['stage']=='Game rounds',]
-data_game_novices = data_game_novices[data_game_novices['expert_dog']=='False',]
-# head(data_game_novices)
+data_game_novices = data %>% 
+  filter(stage == 'Game rounds') %>%
+  filter(expert_dog == 'False')
+head(data_game_novices)
 describeBy(data_game_novices$accuracy, data_game_novices$treatment)
 model = glmer(
-  'accuracy ~ treatment + (treatment|player) + (treatment|round)', 
+  'accuracy ~ treatment + (treatment|player) + (1|round) + (1|kind) + (1|object)', 
   data = data_game_novices, 
   family = binomial
 )
 summary(model)
+
+######################
+# TESTS MAIN TEXT 4.2
+######################
+
+#######################################
+# Most active vs. Least active players
+#######################################
+
+df <- data %>% 
+  filter(treatment == 'paired') %>%
+  filter(stage == 'Game rounds') %>%
+  select(dyad, player, queried) %>%
+  group_by(dyad, player) %>%
+  summarize(queried = sum(queried)) %>%
+  ungroup() %>%
+  group_by(dyad) %>%
+  mutate(queriedMost = max(queried),
+         queriedLeast = min(queried)) %>%
+  ungroup()
+df <- slice(df, seq(1, dim(df)[1], 2))
+head(df)
+dim(df)
+plot(df$queriedMost, df$queriedLeast)
+x = unlist(df$queriedMost)
+y = unlist(df$queriedLeast)
+cor.test(x, y, method=c("pearson", "kendall", "spearman"))
+
+########################################################
+# ANOVA PERCENTAGE OF QUERIES BETWEEN GENDER COMPOSITION
+########################################################
+
+df_gender = read.csv('dyad-composition.csv')
+boxplot(df_gender$queried ~ df_gender$composition)
+fm = aov( lm(df_gender$queried ~ df_gender$composition) )
+summary(fm)
+
+
+############################################################
+# TESTS MAIN TEXT 4.3 AND SUPPLEMENTARY MATERIAL SECTION 2.2
+############################################################
 
 ################################################
 # Game rounds paired novices query vs no query
 ################################################
 
-data_game_novices = data[data['stage']=='Game rounds',]
-data_game_novices = data_game_novices[data_game_novices['treatment']=='paired',]
-data_game_novices = data_game_novices[data_game_novices['expert_dog']=='False',]
-# head(data_game_novices)
+data_game_novices = data %>% 
+  filter(stage == 'Game rounds') %>%
+  filter(treatment=='paired') %>%
+  filter(expert_dog == 'False')
+head(data_game_novices)
 describeBy(data_game_novices$accuracy, data_game_novices$queried)
 model = glmer(
-  'accuracy ~ queried + (1|player) + (1|round)', 
+  'accuracy ~ queried + (queried|player) + (1|dyad) + (1|round) + (1|kind) + (1|object)', 
   data = data_game_novices, 
   family = binomial
 )
 summary(model)
 
-##############################################################
-# Game rounds paired novices mixed-effects linear regressions
-##############################################################
-
-#####################
-# Internal strategy
-#####################
+###################################
+# Linear mixed-effects regressions
+# Game rounds paired novices 
+# INTERNAL strategy
+###################################
 df <- data %>% 
   filter(stage == 'Game rounds') %>%
   filter(treatment == 'paired') %>%
@@ -148,12 +179,14 @@ df_no <- df1 %>%
 df_no <- df_no[complete.cases(df_no),]
 head(df_no)
 plot(df_no$av_accuracy_no, df_no$new_use)
-model = lme(new_use ~ av_accuracy_no, random = ~1|round, data = df_no)
+model = lmer(new_use ~ av_accuracy_no + (1|player) + (1|round), data = df_no)
 summary(model)
 
-#####################
-# Extended strategy
-#####################
+###################################
+# Linear mixed-effects regressions
+# Game rounds paired novices 
+# EXTENDED strategy
+###################################
 df <- data %>% 
   filter(stage == 'Game rounds') %>%
   filter(treatment == 'paired') %>%
@@ -202,34 +235,9 @@ df_yes <- merge(df1,df2,by=c("player","round"))
 df_yes <- df_yes %>% arrange(player,round)
 df_yes <- df_yes[complete.cases(df_yes),]
 head(df_yes,10)
-model = lme(new_use ~ av_accuracy_yes + av_answered, random = ~1|round, data = df_yes)
+# model = lmer(new_use ~ av_accuracy_yes + av_answered + (1|player) + (1|round), data = df_yes)
+model = lmer(new_use ~ av_accuracy_yes + (1|player) + (1|round), data = df_yes)
 summary(model)
-
-
-########################################
-# Query rate own vs. Query rate partner
-########################################
-
-head(data)
-
-df <- data %>% 
-  filter(treatment == 'paired') %>%
-  filter(stage == 'Game rounds') %>%
-  select(dyad, player, queried) %>%
-  group_by(dyad, player) %>%
-  summarize(queried = sum(queried)) %>%
-  ungroup() %>%
-  group_by(dyad) %>%
-  mutate(queriedMost = max(queried),
-         queriedLeast = min(queried)) %>%
-  ungroup()
-df <- slice(df, seq(1, dim(df)[1], 2))
-head(df)
-dim(df)
-plot(df$queriedMost, df$queriedLeast)
-x = unlist(df$queriedMost)
-y = unlist(df$queriedLeast)
-cor.test(x, y, method=c("pearson", "kendall", "spearman"))
 
 
 ###########################################
