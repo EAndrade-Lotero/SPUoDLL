@@ -34,6 +34,21 @@ data$queried = unlist(lapply(data$queried, FUN = fun))
 # TESTS MAIN TEXT 4.1 AND SUPPLEMENTARY MATERIAL SECTION 2.1
 ############################################################
 
+############################
+# Last three Training rounds
+############################
+
+data_training = data[data['stage']=='Training rounds',]
+data_training = data_training[data_training['round']>22,]
+head(data_training)
+describeBy(data_training$accuracy, data_training$treatment)
+model = glmer(
+  'accuracy ~ treatment + round + (round|player) + (1|player) + (1|object)', 
+  data = data_training, 
+  family = binomial
+)
+summary(model)
+
 ##################
 # Training rounds
 ##################
@@ -42,7 +57,7 @@ data_training = data[data['stage']=='Training rounds',]
 head(data_training)
 describeBy(data_training$accuracy, data_training$treatment)
 model = glmer(
-  'accuracy ~ treatment + (treatment|player) + (1|round) + (1|kind) + (1|object)', 
+  'accuracy ~ treatment + round + (round|player) + (1|player) + (1|object)', 
   data = data_training, 
   family = binomial
   )
@@ -58,7 +73,7 @@ data_game_experts = data %>%
 head(data_game_experts)
 describeBy(data_game_experts$accuracy, data_game_experts$treatment)
 model = glmer(
-  'accuracy ~ treatment + (treatment|player) + (1|round) + (1|kind) + (1|object)', 
+  'accuracy ~ treatment + round + (round|player) + (1|player) + (1|object)', 
   data = data_game_experts, 
   family = binomial
 )
@@ -74,7 +89,7 @@ data_game_novices = data %>%
 head(data_game_novices)
 describeBy(data_game_novices$accuracy, data_game_novices$treatment)
 model = glmer(
-  'accuracy ~ treatment + (treatment|player) + (1|round) + (1|kind) + (1|object)', 
+  'accuracy ~ treatment + round + (round|player) + (1|player) + (1|object)', 
   data = data_game_novices, 
   family = binomial
 )
@@ -107,15 +122,6 @@ x = unlist(df$queriedMost)
 y = unlist(df$queriedLeast)
 cor.test(x, y, method=c("pearson", "kendall", "spearman"))
 
-########################################################
-# ANOVA PERCENTAGE OF QUERIES BETWEEN GENDER COMPOSITION
-########################################################
-
-df_gender = read.csv('dyad-composition.csv')
-boxplot(df_gender$queried ~ df_gender$composition)
-fm = aov( lm(df_gender$queried ~ df_gender$composition) )
-summary(fm)
-
 
 ############################################################
 # TESTS MAIN TEXT 4.3 AND SUPPLEMENTARY MATERIAL SECTION 2.2
@@ -132,7 +138,7 @@ data_game_novices = data %>%
 head(data_game_novices)
 describeBy(data_game_novices$accuracy, data_game_novices$queried)
 model = glmer(
-  'accuracy ~ queried + (queried|player) + (1|dyad) + (1|round) + (1|kind) + (1|object)', 
+  'accuracy ~ queried + round + (round|player) + (1|player) + (1|object)', 
   data = data_game_novices, 
   family = binomial
 )
@@ -179,7 +185,7 @@ df_no <- df1 %>%
 df_no <- df_no[complete.cases(df_no),]
 head(df_no)
 plot(df_no$av_accuracy_no, df_no$new_use)
-model = lmer(new_use ~ av_accuracy_no + (1|player) + (1|round), data = df_no)
+model = lmer(new_use ~ av_accuracy_no + round + (round|player), data = df_no)
 summary(model)
 
 ###################################
@@ -235,8 +241,7 @@ df_yes <- merge(df1,df2,by=c("player","round"))
 df_yes <- df_yes %>% arrange(player,round)
 df_yes <- df_yes[complete.cases(df_yes),]
 head(df_yes,10)
-# model = lmer(new_use ~ av_accuracy_yes + av_answered + (1|player) + (1|round), data = df_yes)
-model = lmer(new_use ~ av_accuracy_yes + (1|player) + (1|round), data = df_yes)
+model = lmer(new_use ~ av_accuracy_yes + round + (round|player), data = df_yes)
 summary(model)
 
 
@@ -256,13 +261,15 @@ head(data)
 # Difference of report means
 df = data %>% 
   filter(expertise == 'experts') %>%
-  select(treatment,player,report,accuracy)
+  select(treatment,player,report,accuracy_tr,accuracy_gr)
 # head(df)
 describeBy(df$report, df$treatment)
 x = unlist(df %>% filter(treatment == 'paired') %>% select(report))
 y = unlist(df %>% filter(treatment == 'solo') %>% select(report))
 t.test(x, y, alternative = "two.sided", var.equal = FALSE)
 wilcox.test(x, y, alternative = "two.sided")
+model = lm(report ~ treatment + accuracy_tr + accuracy_gr, data = df)
+summary(model)
 
 # Correlations
 df_experts = data %>% 
@@ -284,7 +291,6 @@ head(df_experts)
 x = unlist(df_experts['report'])
 y = unlist(df_experts['accuracy'])
 cor.test(x, y, method=c("pearson", "kendall", "spearman"))
-
 
 #############################
 # Paired vs. solo NOVICES
