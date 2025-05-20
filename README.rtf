@@ -1,69 +1,101 @@
+# 🐶 Division of Linguistic Labor — Experimental Data Analysis
 
-### Classifying dog breeds datasets ###
+This repository contains data and Python scripts for analyzing behavioral and self-assessment data from the **Classifying Dog Breeds** experiment, designed to study the **Division of Linguistic Labor** in communication and categorization tasks.
 
-Principal Investigator / Contact person: Edgar J. Andrade-Lotero, Universidad del Rosario, Bogota, Colombia,  edgar.andrade@urosario.edu.co
-In collaboration with: Robert L. Goldstone, Indiana University, Bloomington, Indiana, USA, rgoldsto@indiana.edu
-In collaboration with: Javier Alejandro Velazco Garcia, Universidad del Rosario, Bogota, Colombia, javier.velasco8@gmail.com
+---
 
-Publications using these data:
+## 📚 Reference
 
-[1] Andrade-Lotero, E., & Goldstone, R. L., & Ortiz-Duque, J. M., & Velazco-Garcia, J. A. (2021). An experiment on the division of linguistic labor. In preparation.
+If using this repository or datasets in your work, please cite:
 
-Datasets described here:
-- performances.csv
-- rep-understanding.csv
+> Andrade-Lotero, E., Bianconi, M., & Goldstone, R. L. (2022). *The division of linguistic labor for offloading conceptual understanding*. Philosophical Transactions of the Royal Society B: Biological Sciences, 377(1859), 20210360. [https://doi.org/10.1098/rstb.2021.0360](https://doi.org/10.1098/rstb.2021.0360)
 
-=======================
+---
 
-Filename: performances.csv
+## 👨‍🔬 Authors and Contact
 
-Location: https://github.com/EAndrade-Lotero/SPUoDLL/blob/master/performances.csv
+- **Edgar J. Andrade-Lotero** — Universidad del Rosario, Bogotá, Colombia  
+  ✉️ edgar.andrade@urosario.edu.co  
+- **Robert L. Goldstone** — Indiana University, Bloomington, USA  
+  ✉️ rgoldsto@indiana.edu  
+- **Javier Alejandro Velazco García** — Universidad del Rosario, Bogotá, Colombia  
+  ✉️ javier.velasco8@gmail.com
 
-Behavioral data of 20 dyads playing the "Classifying dog breeds" experiment in the paired condition and 44 individuals playing the solo condition (see https://www.protocols.io/edit/classifying-dog-breeds-bvm6n49e). Data was obtained from raw json files output from nodeGame and processed into a single dataframe.
+---
 
-Method of data collection: nodeGame platform. Freely available at: https://github.com/Slendercoder/DLL (paired condition; Spanish interface) and at: https://github.com/Slendercoder/DLL_single (solo condition; Spanish interface).
+## 📂 Datasets
 
-Methods of data processing: Dataset generated from raw data via python scripts to create a single csv from multiple json output from nodeGame.
+### `performances.csv`
 
-Number of variables: 13
-Number of rows: 20735
-Variables:
-1. treatment: single or dyad.
-2. dyad: dyad's name.
-3. player: player's id.
-4. expert_in: refers to the player's expert-dogs (terriers or hounds), that is, the kinds of dogs on which the player trained during training rounds.
-5. novice_in: refers to the player's novice-dogs (terriers or hounds).
-6. stage: experiment's stage (training or game).
-7. round: round of the respective stage.
-8. kind: dog's kind.
-9. classif: refers to the label the player used to classify the dog.
-10. accuracy: whether classification was correct (0=incorrect/1=correct).
-11. queried: number of times the player asked partner about dog (NaN if no query was made or if player belongs to treatment==single).
-12. label: label used by player to query partner (NaN if player didn't query or treatment==single).
-13. answered: proportion of times query was answered by partner.
-14. answer_correct: whether partner's answer was correct or not (0=incorrect/1=correct).
+- 📍 [View file](https://github.com/EAndrade-Lotero/SPUoDLL/blob/master/performances.csv)
+- Data from 20 dyads (paired condition) and 44 individuals (solo condition) playing the *Classifying Dog Breeds* task.
+- Exported from `nodeGame` logs and aggregated using Python scripts.
+- Raw task platforms:  
+  - Paired condition: [DLL](https://github.com/Slendercoder/DLL)  
+  - Solo condition: [DLL_single](https://github.com/Slendercoder/DLL_single)
 
-=======================
+#### Variables
 
-Filename: rep-understanding.csv
+| Name             | Description                                                                 |
+|------------------|-----------------------------------------------------------------------------|
+| `treatment`      | Condition: `single` or `dyad`                                               |
+| `dyad`           | Dyad identifier                                                             |
+| `player`         | Player ID                                                                   |
+| `expert_in`      | Dog kind the player was trained on (terriers or hounds)                    |
+| `novice_in`      | Untrained dog kind                                                          |
+| `stage`          | Experiment stage: `training` or `game`                                      |
+| `round`          | Round number                                                                |
+| `kind`           | Dog kind shown                                                              |
+| `classif`        | Label used by the player                                                    |
+| `accuracy`       | 1 if classification was correct, 0 otherwise                                |
+| `queried`        | Count of times player asked the partner about the dog                      |
+| `label`          | Label used in query (NaN if not queried or in solo condition)               |
+| `answered`       | Proportion of times the query was answered                                  |
+| `answer_correct` | 1 if partner’s answer was correct, 0 otherwise                              |
 
-Location: https://github.com/EAndrade-Lotero/SPUoDLL/blob/master/rep-understanding.csv
+---
 
-Self-understanding reports from each participant for each dog breed, obtained at the end of the "Classifying dog breeds" experiment.
+### `rep-understanding.csv`
 
-Method of data collection: nodeGame platform.
+- 📍 [View file](https://github.com/EAndrade-Lotero/SPUoDLL/blob/master/rep-understanding.csv)
+- Final self-reports from participants on their understanding of dog breeds.
 
-Methods of data processing: Dataset generated from raw data via a python script to create a single csv from multiple json output from nodeGame.
+#### Variables
 
-Number of variables: 9
-Number of rows: 336
-Variables:
-1. treatment: single or dyad.
-2. player: player's id.
-3. kind: the dog's kind.
-4. expertise: whether the player was trained on this kind of dog or not (experts or novices).
-5. report: player's reported understanding score on this kind of dog.
-6. accuracy: mean accuracy over game rounds on this kind of dog.
-7. query: proportion of times the player queried their partner on this kind of dog.
-8. answered: proportion of times queries on this kind of dog were answered by partner.
-9. player_responded: proportion of times player responded to queries on this kind of dog.
+| Name              | Description                                                                 |
+|-------------------|-----------------------------------------------------------------------------|
+| `treatment`       | Condition: `single` or `dyad`                                               |
+| `player`          | Player ID                                                                   |
+| `kind`            | Dog kind                                                                    |
+| `expertise`       | Whether player was trained (`experts`) or not (`novices`) on this kind      |
+| `report`          | Reported understanding score (self-assessed)                                |
+| `accuracy`        | Mean classification accuracy on this dog kind                               |
+| `query`           | Proportion of times the player queried about this kind                      |
+| `answered`        | Proportion of times those queries were answered                             |
+| `player_responded`| Proportion of times player responded to partner queries                     |
+
+---
+
+## 🧪 Analysis
+
+This repository includes Python scripts and figures used in academic analyses, focused on:
+
+- Accuracy and learning curves
+- Information-seeking behavior (queries)
+- Differences between expert and novice performance
+- Correlations between self-assessment and task performance
+
+---
+
+## ⚙️ Data Processing
+
+- All raw data was obtained from `nodeGame` JSON logs.
+- Python scripts were used to merge and clean data into the provided `.csv` files.
+- For experimental protocol, see:  
+  [Classifying Dog Breeds on protocols.io](https://www.protocols.io/edit/classifying-dog-breeds-bvm6n49e)
+
+---
+
+## 📄 License
+
+This project is released for academic use. For reuse or modification, please contact the authors.
